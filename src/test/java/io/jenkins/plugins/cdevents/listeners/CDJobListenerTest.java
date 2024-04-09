@@ -8,6 +8,7 @@ package io.jenkins.plugins.cdevents.listeners;
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Run;
 import hudson.model.TaskListener;
+import io.jenkins.plugins.cdevents.EventHandler;
 import io.jenkins.plugins.cdevents.EventState;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,8 +17,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mockStatic;
@@ -41,16 +40,17 @@ class CDJobListenerTest {
 
     @Test
     void testCDJobListenerOnStarted() {
-        try (MockedStatic<FutureRunner> mockFutureRunner = mockStatic(FutureRunner.class)) {
+        try (MockedStatic<EventHandler> mockEventHandler = mockStatic(EventHandler.class)) {
             ArgumentCaptor<EventState> eventStateArgumentCaptor = ArgumentCaptor.forClass(EventState.class);
             ArgumentCaptor<Run> runArgumentCaptor = ArgumentCaptor.forClass(Run.class);
             ArgumentCaptor<TaskListener> taskListenerArgumentCaptor = ArgumentCaptor.forClass(TaskListener.class);
             ArgumentCaptor<String> eventTypeArgumentCaptor = ArgumentCaptor.forClass(String.class);
-            mockFutureRunner.when(() -> FutureRunner.captureEvent(
+
+            mockEventHandler.when(() -> EventHandler.captureEvent(
                     eventStateArgumentCaptor.capture(),
                     runArgumentCaptor.capture(),
                     taskListenerArgumentCaptor.capture(),
-                    eventTypeArgumentCaptor.capture())).thenReturn(new CompletableFuture<Void>());
+                    eventTypeArgumentCaptor.capture())).then(foo -> null);
 
             CDJobListener cdJobListener = new CDJobListener();
             cdJobListener.onStarted(mockRun, mockListener);
@@ -64,16 +64,17 @@ class CDJobListenerTest {
 
     @Test
     void testCDJobListenerOnCompleted() {
-        try (MockedStatic<FutureRunner> mockFutureRunner = mockStatic(FutureRunner.class)) {
+        try (MockedStatic<EventHandler> mockEventHandler = mockStatic(EventHandler.class)) {
             ArgumentCaptor<EventState> eventStateArgumentCaptor = ArgumentCaptor.forClass(EventState.class);
             ArgumentCaptor<Run> runArgumentCaptor = ArgumentCaptor.forClass(Run.class);
             ArgumentCaptor<TaskListener> taskListenerArgumentCaptor = ArgumentCaptor.forClass(TaskListener.class);
             ArgumentCaptor<String> eventTypeArgumentCaptor = ArgumentCaptor.forClass(String.class);
-            mockFutureRunner.when(() -> FutureRunner.captureEvent(
+
+            mockEventHandler.when(() -> EventHandler.captureEvent(
                     eventStateArgumentCaptor.capture(),
                     runArgumentCaptor.capture(),
                     taskListenerArgumentCaptor.capture(),
-                    eventTypeArgumentCaptor.capture())).thenReturn(new CompletableFuture<Void>());
+                    eventTypeArgumentCaptor.capture())).then(foo -> null);
 
             CDJobListener cdJobListener = new CDJobListener();
             cdJobListener.onCompleted(mockRun, mockListener);

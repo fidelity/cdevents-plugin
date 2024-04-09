@@ -7,14 +7,13 @@ package io.jenkins.plugins.cdevents.listeners;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Queue;
+import io.jenkins.plugins.cdevents.EventHandler;
 import io.jenkins.plugins.cdevents.EventState;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.concurrent.CompletableFuture;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
@@ -27,17 +26,15 @@ class CDQueueListenerTest {
 
     @Test
     void onEnterWaiting() {
-        try (MockedStatic<FutureRunner> mockFutureRunner = mockStatic(FutureRunner.class)) {
+        try (MockedStatic<EventHandler> mockEventHandler = mockStatic(EventHandler.class)) {
             ArgumentCaptor<EventState> eventStateArgumentCaptor = ArgumentCaptor.forClass(EventState.class);
-            ArgumentCaptor<Queue.WaitingItem> waitingItemArgumentCaptor = ArgumentCaptor
-                    .forClass(Queue.WaitingItem.class);
+            ArgumentCaptor<Queue.WaitingItem> waitingItemArgumentCaptor = ArgumentCaptor.forClass(Queue.WaitingItem.class);
             ArgumentCaptor<String> eventTypeArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
             Queue.WaitingItem mockItem = mock(Queue.WaitingItem.class);
-
-            mockFutureRunner.when(() -> FutureRunner.captureEvent(eventStateArgumentCaptor.capture(),
-                    waitingItemArgumentCaptor.capture(),
-                    eventTypeArgumentCaptor.capture())).thenReturn(new CompletableFuture<Void>());
+            mockEventHandler.when(() -> EventHandler.captureEvent(eventStateArgumentCaptor.capture(),
+                            waitingItemArgumentCaptor.capture(),
+                            eventTypeArgumentCaptor.capture())).then(foo -> null);
 
             CDQueueListener cdQueueListener = new CDQueueListener();
             cdQueueListener.onEnterWaiting(mockItem);
