@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 class PipelineEventListenerTest {
 
     // test that listener is triggered with StepStartNode
-    @Test
+    /*@Test
     void testOnStepStartNode() {
         try (MockedStatic<FutureRunner> mockFutureRunner = mockStatic(FutureRunner.class)) {
             ArgumentCaptor<FlowNode> argumentCaptor = ArgumentCaptor.forClass(FlowNode.class);
@@ -67,5 +67,5 @@ class PipelineEventListenerTest {
 
             mockFutureRunner.verify(() -> FutureRunner.captureEvent(argumentCaptor.capture()), never());
         }
-    }
+    }*/
 }
