@@ -2,8 +2,11 @@
  * Copyright FMR LLC <opensource@fidelity.com>
  * SPDX-License-Identifier: Apache-2.0
  */
-
 package io.jenkins.plugins.cdevents.listeners;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.reset;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import hudson.model.Run;
@@ -18,14 +21,11 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mockStatic;
-import static org.mockito.Mockito.reset;
-
-@SuppressFBWarnings(value = "RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE",
+@SuppressFBWarnings(
+        value = "RCN_REDUNDANT_NULLCHECK_WOULD_HAVE_BEEN_A_NPE",
         justification = "Tests are just checking that exceptions are not thrown. Feel free to add more robust tests")
 @ExtendWith(MockitoExtension.class)
-class CDJobListenerTest {
+public class CDJobListenerTest {
 
     @Mock
     Run mockRun;
@@ -46,11 +46,13 @@ class CDJobListenerTest {
             ArgumentCaptor<TaskListener> taskListenerArgumentCaptor = ArgumentCaptor.forClass(TaskListener.class);
             ArgumentCaptor<String> eventTypeArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
-            mockEventHandler.when(() -> EventHandler.captureEvent(
-                    eventStateArgumentCaptor.capture(),
-                    runArgumentCaptor.capture(),
-                    taskListenerArgumentCaptor.capture(),
-                    eventTypeArgumentCaptor.capture())).then(foo -> null);
+            mockEventHandler
+                    .when(() -> EventHandler.captureEvent(
+                            eventStateArgumentCaptor.capture(),
+                            runArgumentCaptor.capture(),
+                            taskListenerArgumentCaptor.capture(),
+                            eventTypeArgumentCaptor.capture()))
+                    .then(foo -> null);
 
             CDJobListener cdJobListener = new CDJobListener();
             cdJobListener.onStarted(mockRun, mockListener);
@@ -70,11 +72,13 @@ class CDJobListenerTest {
             ArgumentCaptor<TaskListener> taskListenerArgumentCaptor = ArgumentCaptor.forClass(TaskListener.class);
             ArgumentCaptor<String> eventTypeArgumentCaptor = ArgumentCaptor.forClass(String.class);
 
-            mockEventHandler.when(() -> EventHandler.captureEvent(
-                    eventStateArgumentCaptor.capture(),
-                    runArgumentCaptor.capture(),
-                    taskListenerArgumentCaptor.capture(),
-                    eventTypeArgumentCaptor.capture())).then(foo -> null);
+            mockEventHandler
+                    .when(() -> EventHandler.captureEvent(
+                            eventStateArgumentCaptor.capture(),
+                            runArgumentCaptor.capture(),
+                            taskListenerArgumentCaptor.capture(),
+                            eventTypeArgumentCaptor.capture()))
+                    .then(foo -> null);
 
             CDJobListener cdJobListener = new CDJobListener();
             cdJobListener.onCompleted(mockRun, mockListener);
@@ -83,6 +87,33 @@ class CDJobListenerTest {
             assertEquals(mockRun, runArgumentCaptor.getValue());
             assertEquals(mockListener, taskListenerArgumentCaptor.getValue());
             assertEquals("pipelineRun", eventTypeArgumentCaptor.getValue());
+        }
+    }
+
+    @Test
+    void testCDJobListenerOnError() {
+        try (MockedStatic<EventHandler> mockEventHandler = mockStatic(EventHandler.class)) {
+            ArgumentCaptor<EventState> eventStateArgumentCaptor = ArgumentCaptor.forClass(EventState.class);
+            ArgumentCaptor<Run> runArgumentCaptor = ArgumentCaptor.forClass(Run.class);
+            ArgumentCaptor<TaskListener> taskListenerArgumentCaptor = ArgumentCaptor.forClass(TaskListener.class);
+            ArgumentCaptor<String> eventTypeArgumentCaptor = ArgumentCaptor.forClass(String.class);
+
+            mockEventHandler
+                    .when(() -> EventHandler.captureEvent(
+                            eventStateArgumentCaptor.capture(),
+                            runArgumentCaptor.capture(),
+                            taskListenerArgumentCaptor.capture(),
+                            eventTypeArgumentCaptor.capture()))
+                    .thenThrow(new InterruptedException());
+
+            CDJobListener cdJobListener = new CDJobListener();
+
+            try {
+                cdJobListener.onCompleted(mockRun, mockListener);
+            } catch (Exception e) {
+                assertEquals(InterruptedException.class, e.getClass());
+            }
+
         }
     }
 }
